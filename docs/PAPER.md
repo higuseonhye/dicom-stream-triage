@@ -12,7 +12,7 @@ Eight uncompressed 2048 px chest DICOM studies were read as Explicit VR and wind
 
 A consumer image and a DICOM object do not share a layout. A DICOM file is a sequence of tagged elements. The header carries identifiers, age, study time, manufacturer, technique such as kVp and mA, and the display window (center and width). The pixel element is often 12-bit or 16-bit. Computed-tomography pixels are stored as Hounsfield units. A radiograph stores raw attenuation, rescaled into the integer range. Neither is an 8-bit JPEG.
 
-Two costs follow. First, archives do not agree on a codec. Uncompressed Explicit VR, JPEG Lossless, JPEG 2000, and RLE can all appear, and the CPU time is dominated by whichever codec the archive chose. Second, a network wants a float tensor, commonly on \([0, 1]\). Windowing a 16-bit integer into float32 copies and casts even when the integer frame itself was viewed without a copy.
+Two costs follow. First, archives do not agree on a codec. Uncompressed Explicit VR, JPEG Lossless, JPEG 2000, and RLE can all appear, and the CPU time is dominated by whichever codec the archive chose. Second, a network wants a float tensor, commonly on $`[0, 1]`$. Windowing a 16-bit integer into float32 copies and casts even when the integer frame itself was viewed without a copy.
 
 The high-speed path people describe has two parts: do not parse every metadata element when only the pixel offset is required, and decode on several threads, ideally with a memory map so the pixel bytes are not copied. Section 3 measures a narrower version of the first idea, plus threads. It does not memory-map the file.
 
@@ -36,13 +36,13 @@ Published studies of real lists are a separate evidence base. Annarumma and coll
 
 ## 2. Methods
 
-Lungs are two ellipses. Ribs and vessels are drawn only inside the lungs. A nodule is a Gaussian with \(\sigma = 0.020 \times 256\) px. A vessel cross is a thin horizontal and vertical ridge. A pneumothorax darkens the apex of one lung and brightens a pleural line. Pixels are stored as \(200 + 3500x\) and recovered with window center 1950 and width 3500.
+Lungs are two ellipses. Ribs and vessels are drawn only inside the lungs. A nodule is a Gaussian with $`\sigma = 0.020 \times 256`$ px. A vessel cross is a thin horizontal and vertical ridge. A pneumothorax darkens the apex of one lung and brightens a pleural line. Pixels are stored as $`200 + 3500x`$ and recovered with window center 1950 and width 3500.
 
 Both decode paths read the file, open the frame, and window it. The fast path views Pixel Data with `np.frombuffer`. The integer frame is not copied. The float window is. Eight threads are used. Files are read once as a warm-up before timing.
 
-The residual is \(r = \mathrm{clip}(x - G_{\sigma=6}(x), 0)\). Peaks outside the lung ellipse are dropped. \(s = r / (r + 0.35)\). The baseline is \(s \ge 0.5\). The filter adds \(H \le \tau\). \(H\) is the entropy of a 36 px window summed onto 6×6 cells. Matching is greedy IoU in descending score, threshold 0.3. τ is chosen on 90 studies that are not the evaluation set.
+The residual is $`r = \mathrm{clip}(x - G_{\sigma=6}(x), 0)`$. Peaks outside the lung ellipse are dropped. $`s = r / (r + 0.35)`$. The baseline is $`s \geq 0.5`$. The filter adds $`H \leq \tau`$. $`H`$ is the entropy of a 36 px window summed onto a 6×6 grid. Matching is greedy IoU in descending score, threshold 0.3. $`\tau`$ is chosen on 90 studies that are not the evaluation set.
 
-Two ConvNeXt-style blocks form a stride-4 head, trained for 16 epochs on 160 studies. Only the pneumothorax probability is taken from that head. Nodule evidence is \(\mathrm{clip}((s - 0.46) / 0.25, 0, 1)\). The entropy of the renormalized normal, nodule, and pneumothorax masses is the study uncertainty. Auto-pass cuts are pneumothorax 0.25, nodule 0.35, and entropy 0.50 nat. Priority is \(5 p_{\mathrm{ptx}} + 2 p_{\mathrm{nodule}} + 1.2 H\). One wait slot is 45 seconds.
+Two ConvNeXt-style blocks form a stride-4 head, trained for 16 epochs on 160 studies. Only the pneumothorax probability is taken from that head. Nodule evidence is $`\mathrm{clip}((s - 0.46) / 0.25, 0, 1)`$. The entropy of the renormalized normal, nodule, and pneumothorax masses is the study uncertainty. Auto-pass cuts are pneumothorax 0.25, nodule 0.35, and entropy 0.50 nat. Priority is $`5 p_{\mathrm{ptx}} + 2 p_{\mathrm{nodule}} + 1.2 H`$. One wait slot is 45 seconds.
 
 ## 3. Results
 

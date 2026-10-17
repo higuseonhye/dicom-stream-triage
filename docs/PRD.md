@@ -19,14 +19,14 @@ Those are the operational reasons a triage product exists. They are not, by them
 | --- | --- |
 | Input | Synthetic computed radiography, uncompressed Explicit VR Little Endian, 16-bit, one frame |
 | Decode | Compare sequential pydicom with `np.frombuffer` plus a threaded batch, under the same window |
-| Boxes | Lung residual peaks. Confidence ≥ 0.5 is the baseline. Spatial entropy ≤ τ is the filter |
-| Matching | Greedy box IoU ≥ 0.3 |
+| Boxes | Lung residual peaks. Confidence $`\geq 0.5`$ is the baseline. Spatial entropy $`\leq \tau`$ is the filter |
+| Matching | Greedy box IoU $`\geq 0.3`$ |
 | Study score | Pneumothorax from the ConvNeXt head. Nodule evidence from the residual peak, shifted so scores at or below 0.46 contribute 0 |
 | Auto-pass | Pneumothorax < 0.25, nodule < 0.35, fused-distribution entropy < 0.50 nat |
-| Order | Remaining studies by \(5 p_{\mathrm{ptx}} + 2 p_{\mathrm{nodule}} + 1.2 H\) |
+| Order | Remaining studies by $`5 p_{\mathrm{ptx}} + 2 p_{\mathrm{nodule}} + 1.2 H`$ |
 | Wait | One read is a 45-second slot. An auto-passed study does not consume a slot |
 
-τ is chosen on the tuning split as the cut with the largest false-positive drop that does not lower precision and keeps at least 85% of baseline recall. Reported box counts freeze that cut on the held-out split.
+$`\tau`$ is chosen on the tuning split as the cut with the largest false-positive drop that does not lower precision and keeps at least 85% of baseline recall. Reported box counts freeze that cut on the held-out split.
 
 ## 4. Out of scope
 
@@ -43,9 +43,9 @@ Those are the operational reasons a triage product exists. They are not, by them
 | Batch throughput | Threaded FPS above pydicom FPS | 69.73 > 36.65 (1.90×) |
 | Single-study latency | Report sequential zero-copy | 24.93 ms (pydicom 27.28 ms) |
 | Pixel agreement | Max absolute window error 0 | 0 |
-| False-positive reduction | ≥ 40% | 85.7% (147 → 21) |
-| Precision | Filtered ≥ baseline | 0.580 ≥ 0.169 |
-| Emergency wait | ≥ 80% and zero auto-passed emergencies | 93.7% (3587.7 s → 225.0 s), 0/11 |
+| False-positive reduction | $`\geq 40\%`$ | 85.7% (147 → 21) |
+| Precision | Filtered $`\geq`$ baseline | $`0.580 \geq 0.169`$ |
+| Emergency wait | $`\geq 80\%`$ and zero auto-passed emergencies | 93.7% (3587.7 s → 225.0 s), 0/11 |
 | Normal auto-pass | Report | 100% (132/132) |
 | Nodule review | Report | 77.3% (17/22). Five nodules auto-passed |
 
@@ -55,7 +55,7 @@ Latency moves if the run is repeated. Box counts and queue counts are fixed for 
 
 An auto-passed study leaves the radiologist queue. An auto-passed pneumothorax is a miss. Seed 0 has zero misses.
 
-Five nodules had residual peaks in the normal band (≤ 0.46), so their nodule evidence was 0 and they left with the normals. Lowering the nodule cap does not separate those five from normals on this score. All 15 vessel crossings stayed in review.
+Five nodules had residual peaks in the normal band ($`\leq 0.46`$), so their nodule evidence was 0 and they left with the normals. Lowering the nodule cap does not separate those five from normals on this score. All 15 vessel crossings stayed in review.
 
 ## 7. What a later service would still have to add
 

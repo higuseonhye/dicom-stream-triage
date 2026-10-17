@@ -43,7 +43,7 @@ Computer-assisted detection and diagnosis (CADe, CADx) and computer-assisted tri
 | Experiment | Comparison | Target |
 | --- | --- | --- |
 | Decode | Sequential pydicom versus `np.frombuffer` plus a thread pool | Threaded throughput above sequential pydicom. Single-study latency is the sequential zero-copy row. |
-| Boxes | Residual peak ≥ 0.5 versus the same cut and spatial entropy ≤ τ | At least 40% fewer false positives, with IoU-0.3 precision not worse. |
+| Boxes | Residual peak $`\geq 0.5`$ versus the same cut and spatial entropy $`\leq \tau`$ | At least 40% fewer false positives, with IoU 0.3 precision not worse. |
 | Worklist | Arrival order versus pneumothorax, nodule, and entropy priority | At least 80% shorter emergency wait, and zero auto-passed emergencies. |
 
 `--synthetic` is required. Defaults are an uncompressed 2048 px frame, 8 studies and 8 threads for the pipeline, 160 training studies for 16 epochs, 90 tuning studies, 90 held-out studies, a worklist of 180, and seed 0. Without the flag the runner exits 2.

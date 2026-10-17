@@ -104,7 +104,7 @@ def render_markdown(report: dict) -> str:
         "One CPU run on synthetic chest studies. No hospital archive, no vendor weights, and no JPEG 2000 or RLE file is read.",
         "",
         f"- Seed {report['seed']}. Pipeline frame {pipe['frame']} px, {pipe['n_studies']} studies, {pipe['workers']} threads.",
-        f"- Box counts use {boxes['eval_studies']} held-out studies, separate from the {boxes['tune_studies']} used to choose τ. IoU threshold {boxes['iou_threshold']}.",
+        f"- Box counts use {boxes['eval_studies']} held-out studies, separate from the {boxes['tune_studies']} used to choose $\\tau$. IoU threshold {boxes['iou_threshold']}.",
         f"- Worklist of {work['studies']} studies. One read is a simulated slot of {work['read_seconds']:.0f} seconds.",
         "",
         "## 1. DICOM decode",
@@ -144,14 +144,14 @@ def render_markdown(report: dict) -> str:
         "",
         "## 2. False-positive boxes",
         "",
-        "The baseline keeps lung residual peaks with confidence ≥ 0.5. The filter also requires spatial entropy ≤ τ. Entropy is the Shannon entropy, in nats, of the residual mass inside a 36 px window after pooling onto a 6×6 grid. τ is chosen on the tuning split as the cut with the largest false-positive drop that does not lower precision and keeps at least 85% of baseline recall. The table freezes that cut on the held-out split.",
+        "The baseline keeps lung residual peaks with confidence $`\\geq 0.5`$. The filter also requires spatial entropy $`H \\leq \\tau`$. Entropy is the Shannon entropy, in nats, of the residual mass inside a 36 px window after pooling onto a 6×6 grid. $\\tau$ is chosen on the tuning split as the cut with the largest false-positive drop that does not lower precision and keeps at least 85% of baseline recall. The table freezes that cut on the held-out split.",
         "",
         _md_table(
             ["Policy", "TP", "FP", "FN", "Precision", "Recall"],
             [
-                ["confidence ≥ 0.5", str(base["tp"]), str(base["fp"]), str(base["fn"]), _num(base["precision"]), _num(base["recall"])],
+                ["confidence $`\\geq 0.5`$", str(base["tp"]), str(base["fp"]), str(base["fn"]), _num(base["precision"]), _num(base["recall"])],
                 [
-                    f"confidence ≥ 0.5 and H ≤ {_num(boxes['tau'], 3)}",
+                    f"confidence $`\\geq 0.5`$ and $`H \\leq {_num(boxes['tau'], 3)}`$",
                     str(kept["tp"]),
                     str(kept["fp"]),
                     str(kept["fn"]),
@@ -168,7 +168,7 @@ def render_markdown(report: dict) -> str:
         "",
         "## 3. Worklist",
         "",
-        "The study distribution is fused. Pneumothorax mass is the third class of the ConvNeXt study head. Nodule mass is the residual-peak score shifted by 0.46 and divided by 0.25, and scores at or below 0.46 contribute 0. The remainder is normal mass, and the three values are renormalized. Auto-pass requires pneumothorax probability, nodule probability, and the entropy of that distribution all below their cuts. Everything else is ordered by 5 × pneumothorax + 2 × nodule + 1.2 × entropy. Emergency wait is the time until a study whose label is pneumothorax is opened. An auto-passed emergency is a miss and is left out of the wait average.",
+        "The study distribution is fused. Pneumothorax mass is the third class of the ConvNeXt study head. Nodule mass is the residual-peak score shifted by 0.46 and divided by 0.25, and scores at or below 0.46 contribute 0. The remainder is normal mass, and the three values are renormalized. Auto-pass requires pneumothorax probability, nodule probability, and the entropy of that distribution all below their cuts. Everything else is ordered by $`5 p_{\\mathrm{ptx}} + 2 p_{\\mathrm{nodule}} + 1.2 H`$. Emergency wait is the time until a study whose label is pneumothorax is opened. An auto-passed emergency is a miss and is left out of the wait average.",
         "",
         _md_table(
             ["Kind", "Studies", "Mean nodule", "Mean pneumothorax", "Mean entropy", "Auto-pass"],
