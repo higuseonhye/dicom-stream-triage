@@ -1,0 +1,143 @@
+{
+  "suite": "dicom-stream-triage",
+  "version": "0.2.0",
+  "synthetic": true,
+  "seed": 0,
+  "environment": {
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "cpu_count": 12,
+    "numpy": "2.4.3",
+    "torch": "2.13.0+cpu",
+    "torch_num_threads": 6,
+    "cuda_available": false
+  },
+  "separation": {
+    "nodule_nats": 1.3889500542258457,
+    "cross_nats": 2.880754009537335
+  },
+  "pipeline": {
+    "n_studies": 8,
+    "frame": 2048,
+    "workers": 8,
+    "transfer_syntax": "1.2.840.10008.1.2.1",
+    "max_abs_diff": 0.0,
+    "note": "Uncompressed explicit VR. Both paths read the file, decode the frame, and window it. np.frombuffer aliases the uint16 bytes. The float window is a new allocation. JPEG 2000 and RLE are not in this timing.",
+    "pydicom_sequential": {
+      "p50_ms": 26.487600000109524,
+      "p95_ms": 29.576370006543584,
+      "mean_ms": 27.279212503344752,
+      "fps": 36.65044274411957,
+      "wall_s": 0.21827839995967224
+    },
+    "zerocopy_sequential": {
+      "p50_ms": 24.71825003158301,
+      "p95_ms": 27.043710002908483,
+      "mean_ms": 24.93282500654459,
+      "fps": 40.09824070021678,
+      "wall_s": 0.19950999994762242
+    },
+    "zerocopy_threaded": {
+      "mean_ms": 14.34122499631485,
+      "fps": 69.72905036054884,
+      "wall_s": 0.1147297999705188
+    }
+  },
+  "boxes": {
+    "iou_threshold": 0.3,
+    "score_threshold": 0.5,
+    "tau": 2.5780385713896905,
+    "tune_studies": 90,
+    "eval_studies": 90,
+    "tune_baseline": {
+      "tp": 30,
+      "fp": 146,
+      "fn": 0,
+      "precision": 0.17045454545454544,
+      "recall": 1.0
+    },
+    "eval_baseline": {
+      "tp": 30,
+      "fp": 147,
+      "fn": 0,
+      "precision": 0.1694915254237288,
+      "recall": 1.0
+    },
+    "eval_filtered": {
+      "tp": 29,
+      "fp": 21,
+      "fn": 1,
+      "precision": 0.58,
+      "recall": 0.9666666666666667
+    },
+    "fp_reduction": 0.8571428571428571
+  },
+  "worklist": {
+    "studies": 180,
+    "read_seconds": 45.0,
+    "auto_pass_count": 137,
+    "normal_auto_pass_rate": 1.0,
+    "nodule_review_rate": 0.7727272727272727,
+    "emergencies": 11,
+    "emergency_misses": 0,
+    "emergency_miss_rate": 0.0,
+    "fifo_emergency_wait_s": 3587.727272727273,
+    "priority_emergency_wait_s": 225.0,
+    "wait_reduction": 0.9372862029646523,
+    "cuts": {
+      "nodule": 0.35,
+      "ptx": 0.25,
+      "entropy": 0.5
+    },
+    "by_kind": [
+      {
+        "kind": "normal",
+        "studies": 132,
+        "mean_nodule": 0.0,
+        "mean_ptx": 1.0933978505326682e-05,
+        "mean_entropy": 0.0001360119551486911,
+        "auto_pass_rate": 1.0,
+        "mean_priority": 0.00021788423870506274
+      },
+      {
+        "kind": "nodule",
+        "studies": 22,
+        "mean_nodule": 0.20454293338294735,
+        "mean_ptx": 0.001615720039856084,
+        "mean_entropy": 0.517414741058163,
+        "auto_pass_rate": 0.22727272727272727,
+        "mean_priority": 1.0380621562349703
+      },
+      {
+        "kind": "vessel",
+        "studies": 15,
+        "mean_nodule": 0.6742663507258602,
+        "mean_ptx": 0.0027836424233036844,
+        "mean_entropy": 0.6396856710251845,
+        "auto_pass_rate": 0.0,
+        "mean_priority": 2.13007371879846
+      },
+      {
+        "kind": "pneumothorax",
+        "studies": 11,
+        "mean_nodule": 0.4697998276784332,
+        "mean_ptx": 0.5302001723215668,
+        "mean_entropy": 0.6913107566760976,
+        "auto_pass_rate": 0.0,
+        "mean_priority": 4.420173424976017
+      }
+    ],
+    "nodule_kind_code": 1
+  },
+  "train_loss": 0.07466570883989335,
+  "targets": {
+    "fp_reduction_target": 0.4,
+    "wait_reduction_target": 0.8,
+    "decode_faster": true,
+    "decode_speedup": 1.902543192926001,
+    "fp_reduction": true,
+    "precision_defense": true,
+    "wait_reduction": true
+  }
+}
